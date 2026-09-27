@@ -21,15 +21,17 @@ python manage.py runserver
 ```
 
 Then visit:
+
 - **http://127.0.0.1:8000/** — public homepage with Bangla notices
 - **http://127.0.0.1:8000/admin/** — full Django admin (all models, best
   place to browse/edit everything without building a frontend)
 - **http://127.0.0.1:8000/api/** — REST API (see section 5)
 
 The seed script creates a ready-to-use superuser:
-| Username | Password    | Role  |
-|----------|-------------|-------|
-| `admin`  | `admin12345`| Admin (superuser) |
+
+| Username | Password     | Role              |
+| -------- | ------------ | ----------------- |
+| `admin`  | `admin12345` | Admin (superuser) |
 
 Every seeded teacher can also log in: username `teacher001`…`teacher100`,
 password `teacher12345` for all of them. Run
@@ -76,20 +78,21 @@ response for "everything about this student" without the database table
 itself becoming a grab-bag.
 
 To add a brand-new feature area (e.g. "Library", "Transport", "Attendance"):
+
 1. `python manage.py startapp library apps/library` (then fix `apps.py`'s
    `name = "apps.library"`).
 2. Add `"apps.library"` to `INSTALLED_APPS` in `settings.py`.
 3. Add `path("api/", include("apps.library.urls"))` in the root `urls.py`.
-No existing file needs to change beyond those two lines.
+   No existing file needs to change beyond those two lines.
 
 ## 3. Roles & permissions
 
-| Role | Can do |
-|---|---|
-| **Admin** / **Headteacher** | Full control: every student, teacher, class, subject, bill, notice. |
-| **Class Teacher** (a `Teacher` who is set as a `Section.class_teacher`) | Full read/write access to every student **in their own section**; read-only for students in other sections they merely teach a subject in. |
-| **Teacher** (subject teacher) | Read-only access to students in the section(s) they're assigned to teach; can enter/edit marks only for their own subject + section combination. |
-| Money (`Bill`, `Payment`) | Admin/headteacher only can create/edit; class teachers can view their own students' bills; nobody else. |
+| Role                                                                    | Can do                                                                                                                                           |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Admin** / **Headteacher**                                             | Full control: every student, teacher, class, subject, bill, notice.                                                                              |
+| **Class Teacher** (a `Teacher` who is set as a `Section.class_teacher`) | Full read/write access to every student**in their own section**; read-only for students in other sections they merely teach a subject in.        |
+| **Teacher** (subject teacher)                                           | Read-only access to students in the section(s) they're assigned to teach; can enter/edit marks only for their own subject + section combination. |
+| Money (`Bill`, `Payment`)                                               | Admin/headteacher only can create/edit; class teachers can view their own students' bills; nobody else.                                          |
 
 All of this logic lives in **one file**: `apps/core/permissions.py`. Tighten
 or loosen a rule there rather than hunting through every app's `views.py`.
@@ -130,20 +133,20 @@ JWT auth: `POST /api/auth/token/` with `{"username", "password"}` returns
 `{"access", "refresh"}`. Send `Authorization: Bearer <access>` on every
 other request.
 
-| Endpoint | Notes |
-|---|---|
-| `/api/users/` | Accounts (admin/headteacher write, everyone read) |
-| `/api/teachers/` | Teacher profiles |
-| `/api/students/` | Student records — role-scoped, see section 3 |
-| `/api/classes/`, `/api/groups/`, `/api/sections/`, `/api/subjects/`, `/api/academic-years/` | Academic structure |
-| `/api/exams/`, `/api/mark-entries/`, `/api/exam-results/` | Marks & GPA |
-| `/api/fee-categories/`, `/api/bills/`, `/api/payments/` | Billing |
-| `/api/notices/` | Notice CRUD (auth'd) |
-| `/api/public/notices/` | Unauthenticated JSON feed, powers the homepage |
-| `/api/comments/` | Teacher comments on a student |
-| `/api/cards/id/<student_id>/` | Student ID card PDF |
-| `/api/cards/registration/<student_id>/` | Registration card PDF |
-| `/api/cards/admit/<student_id>/<exam_id>/` | Admit card PDF for an exam |
+| Endpoint                                                                                    | Notes                                             |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `/api/users/`                                                                               | Accounts (admin/headteacher write, everyone read) |
+| `/api/teachers/`                                                                            | Teacher profiles                                  |
+| `/api/students/`                                                                            | Student records — role-scoped, see section 3      |
+| `/api/classes/`, `/api/groups/`, `/api/sections/`, `/api/subjects/`, `/api/academic-years/` | Academic structure                                |
+| `/api/exams/`, `/api/mark-entries/`, `/api/exam-results/`                                   | Marks & GPA                                       |
+| `/api/fee-categories/`, `/api/bills/`, `/api/payments/`                                     | Billing                                           |
+| `/api/notices/`                                                                             | Notice CRUD (auth'd)                              |
+| `/api/public/notices/`                                                                      | Unauthenticated JSON feed, powers the homepage    |
+| `/api/comments/`                                                                            | Teacher comments on a student                     |
+| `/api/cards/id/<student_id>/`                                                               | Student ID card PDF                               |
+| `/api/cards/registration/<student_id>/`                                                     | Registration card PDF                             |
+| `/api/cards/admit/<student_id>/<exam_id>/`                                                  | Admit card PDF for an exam                        |
 
 All list endpoints support `?search=`, pagination, and `django-filter`
 query params for their listed `filterset_fields` (e.g.
@@ -159,7 +162,7 @@ stored and returned exactly as typed — no special encoding needed anywhere
 in the stack. Manage notices at `/admin/notices/notice/` or via
 `/api/notices/`.
 
-If you also want Bangla text rendered *inside* the PDF cards (not just the
+If you also want Bangla text rendered _inside_ the PDF cards (not just the
 homepage), see the note at the top of `apps/cards/services.py` — it needs a
 bundled Bangla `.ttf` registered with ReportLab, which isn't included here
 to keep the repo small.
@@ -173,6 +176,7 @@ python manage.py seed_data --flush                   # wipe previously seeded da
 ```
 
 What gets created:
+
 - 1 `AcademicYear` (2026), `SchoolClass` for levels 6–10
 - 4 `Group`s (Science, Commerce, Arts/Humanities, General)
 - All 28 NCTB subjects with their exact marks distribution
@@ -197,6 +201,7 @@ Takes roughly 60 seconds for the full 10K/100 run on a typical laptop.
 
 This ships with SQLite and `DEBUG=True` for zero-friction local development.
 Before deploying:
+
 - Set `DJANGO_DEBUG=False` and a strong `DJANGO_SECRET_KEY` env var
 - Point `DATABASES` at Postgres (recommended for 10K+ student rows)
 - Set `DJANGO_ALLOWED_HOSTS` to your real domain(s)
