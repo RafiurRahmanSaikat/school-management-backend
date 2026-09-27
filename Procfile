@@ -1,1 +1,2 @@
-web: gunicorn school_management.wsgi --log-file -
+
+web: uv run gunicorn school_management.wsgi:application
