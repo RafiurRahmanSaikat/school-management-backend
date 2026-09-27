@@ -1,0 +1,335 @@
+### School Management System — API test file
+### Works with the VS Code "REST Client" extension (humao.rest-client) or
+### JetBrains' built-in HTTP client. Run requests top-to-bottom — the login
+### request captures the access token into a variable that later requests
+### reuse automatically.
+###
+### Prereqs:
+###   python manage.py runserver
+###   python manage.py seed_data     (so students/teachers/exams exist)
+
+@baseUrl = http://127.0.0.1:8000
+@contentType = application/json
+
+### ===========================================================
+### 0. AUTH
+### ===========================================================
+
+# @name login
+POST {{baseUrl}}/api/auth/token/
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "admin12345"
+}
+
+###
+
+@accessToken = {{login.response.body.$.access}}
+@refreshToken = {{login.response.body.$.refresh}}
+
+### Refresh the access token when it expires (8h lifetime by default)
+POST {{baseUrl}}/api/auth/token/refresh/
+Content-Type: {{contentType}}
+
+{
+  "refresh": "{{refreshToken}}"
+}
+
+### Login as a seeded teacher instead (any of teacher001..teacher100)
+# @name loginTeacher
+POST {{baseUrl}}/api/auth/token/
+Content-Type: {{contentType}}
+
+{
+  "username": "teacher001",
+  "password": "teacher12345"
+}
+
+###
+
+@teacherToken = {{loginTeacher.response.body.$.access}}
+
+
+### ===========================================================
+### 1. HOMEPAGE & PUBLIC NOTICES (no auth required)
+### ===========================================================
+
+### Public Bangla notice board (HTML)
+GET {{baseUrl}}/
+
+### Public notices feed (JSON, unauthenticated)
+GET {{baseUrl}}/api/public/notices/
+
+
+### ===========================================================
+### 2. USERS / ACCOUNTS  (admin/headteacher write, everyone read)
+### ===========================================================
+
+### List users
+GET {{baseUrl}}/api/users/?page=1
+Authorization: Bearer {{accessToken}}
+
+### Retrieve a single user (replace 1 with a real id from the list above)
+GET {{baseUrl}}/api/users/1/
+Authorization: Bearer {{accessToken}}
+
+### Create a new staff account
+POST {{baseUrl}}/api/users/
+Authorization: Bearer {{accessToken}}
+Content-Type: {{contentType}}
+
+{
+  "username": "newstaff01",
+  "password": "ChangeMe123!",
+  "first_name": "Nusrat",
+  "last_name": "Jahan",
+  "email": "newstaff01@school.edu.bd",
+  "phone": "01711000000",
+  "role": "STAFF",
+  "gender": "F"
+}
+
+
+### ===========================================================
+### 3. ACADEMIC STRUCTURE  (read: everyone, write: admin/headteacher)
+### ===========================================================
+
+### Academic years
+GET {{baseUrl}}/api/academic-years/
+Authorization: Bearer {{accessToken}}
+
+### Classes (Form 6-10)
+GET {{baseUrl}}/api/classes/
+Authorization: Bearer {{accessToken}}
+
+### Groups (Science / Commerce / Arts / General)
+GET {{baseUrl}}/api/groups/
+Authorization: Bearer {{accessToken}}
+
+### Sections — filter by class/group, e.g. all Class 9 Science sections
+GET {{baseUrl}}/api/sections/?school_class=1
+Authorization: Bearer {{accessToken}}
+
+### Subjects — full NCTB list
+GET {{baseUrl}}/api/subjects/
+Authorization: Bearer {{accessToken}}
+
+### Subjects filtered by category
+GET {{baseUrl}}/api/subjects/?category=SCIENCE
+Authorization: Bearer {{accessToken}}
+
+
+### ===========================================================
+### 4. TEACHERS
+### ===========================================================
+
+### List teachers
+GET {{baseUrl}}/api/teachers/?page=1
+Authorization: Bearer {{accessToken}}
+
+### Search teachers by name
+GET {{baseUrl}}/api/teachers/?search=Rahman
+Authorization: Bearer {{accessToken}}
+
+### Retrieve one teacher (replace 1 with a real id)
+GET {{baseUrl}}/api/teachers/1/
+Authorization: Bearer {{accessToken}}
+
+### Update a teacher's designation/qualification (admin/headteacher only)
+PATCH {{baseUrl}}/api/teachers/1/
+Authorization: Bearer {{accessToken}}
+Content-Type: {{contentType}}
+
+{
+  "education_qualification": "M.Sc in Physics, B.Ed"
+}
+
+
+### ===========================================================
+### 5. STUDENTS  (role-scoped — see README section 3)
+### ===========================================================
+
+### List students (paginated)
+GET {{baseUrl}}/api/students/?page=1
+Authorization: Bearer {{accessToken}}
+
+### Filter: all active Class 9 Science students
+GET {{baseUrl}}/api/students/?section__school_class=4&section__group=1&status=ACTIVE
+Authorization: Bearer {{accessToken}}
+
+### Search students by name / registration / guardian name
+GET {{baseUrl}}/api/students/?search=Rahman
+Authorization: Bearer {{accessToken}}
+
+### Full detail for one student — replace 201 with a real id
+GET {{baseUrl}}/api/students/201/
+Authorization: Bearer {{accessToken}}
+
+### Update a student (admin/headteacher, or that student's class teacher only)
+PATCH {{baseUrl}}/api/students/201/
+Authorization: Bearer {{accessToken}}
+Content-Type: {{contentType}}
+
+{
+  "previous_school": "Updated Previous School Name"
+}
+
+### Same request as a subject teacher (should be 403 outside their own class-teacher section)
+GET {{baseUrl}}/api/students/201/
+Authorization: Bearer {{teacherToken}}
+
+### Create a new student (admin/headteacher)
+POST {{baseUrl}}/api/students/
+Authorization: Bearer {{accessToken}}
+Content-Type: {{contentType}}
+
+{
+  "first_name": "Arifa",
+  "last_name": "Islam",
+  "gender": "F",
+  "date_of_birth": "2012-04-15",
+  "religion": "ISLAM",
+  "section": 1,
+  "roll_no": 999,
+  "registration_no": "2026999999",
+  "admission_date": "2026-01-10",
+  "father_name": "Kamal Islam",
+  "father_phone": "01711111111",
+  "mother_name": "Rehana Islam",
+  "mother_phone": "01722222222",
+  "guardian_relation": "FATHER",
+  "guardian_name": "Kamal Islam",
+  "guardian_phone": "01711111111"
+}
+
+
+### ===========================================================
+### 6. EXAMS, MARKS & GPA
+### ===========================================================
+
+### List exams
+GET {{baseUrl}}/api/exams/
+Authorization: Bearer {{accessToken}}
+
+### Mark entries for a specific student
+GET {{baseUrl}}/api/mark-entries/?student=3537
+Authorization: Bearer {{accessToken}}
+
+### Enter/update a mark for a student+subject+exam (admin/headteacher, or the assigned subject teacher)
+POST {{baseUrl}}/api/mark-entries/
+Authorization: Bearer {{accessToken}}
+Content-Type: {{contentType}}
+
+{
+  "exam": 1,
+  "student": 3537,
+  "subject": 1,
+  "cq_obtained": 65,
+  "mcq_obtained": 28,
+  "practical_obtained": 0
+}
+
+### Recompute a student's GPA/result for an exam after marks change
+POST {{baseUrl}}/api/mark-entries/recompute/
+Authorization: Bearer {{accessToken}}
+Content-Type: {{contentType}}
+
+{
+  "student": 3537,
+  "exam": 1
+}
+
+### Exam results (GPA) for a student
+GET {{baseUrl}}/api/exam-results/?student=3537
+Authorization: Bearer {{accessToken}}
+
+
+### ===========================================================
+### 7. BILLING  (write: admin/headteacher only)
+### ===========================================================
+
+### Fee categories
+GET {{baseUrl}}/api/fee-categories/
+Authorization: Bearer {{accessToken}}
+
+### Bills for a student
+GET {{baseUrl}}/api/bills/?student=3537
+Authorization: Bearer {{accessToken}}
+
+### Unpaid bills across the school
+GET {{baseUrl}}/api/bills/?status=UNPAID
+Authorization: Bearer {{accessToken}}
+
+### Record a payment against a bill (replace 1 with a real bill id)
+POST {{baseUrl}}/api/payments/
+Authorization: Bearer {{accessToken}}
+Content-Type: {{contentType}}
+
+{
+  "bill": 1,
+  "amount": 500,
+  "method": "BKASH",
+  "paid_on": "2026-09-26",
+  "note": "Paid via bKash"
+}
+
+
+### ===========================================================
+### 8. NOTICES  (Bangla unicode homepage board)
+### ===========================================================
+
+### List notices (auth'd)
+GET {{baseUrl}}/api/notices/
+Authorization: Bearer {{accessToken}}
+
+### Publish a new Bangla notice (admin/headteacher)
+POST {{baseUrl}}/api/notices/
+Authorization: Bearer {{accessToken}}
+Content-Type: {{contentType}}
+
+{
+  "title": "শিক্ষক অভিভাবক সমাবেশ",
+  "body": "আগামী ৫ অক্টোবর ২০২৬ তারিখে শিক্ষক-অভিভাবক সমাবেশ অনুষ্ঠিত হবে। সকল অভিভাবককে উপস্থিত থাকার জন্য অনুরোধ করা হলো।",
+  "category": "GENERAL",
+  "is_published": true,
+  "pin_to_top": false
+}
+
+
+### ===========================================================
+### 9. TEACHER COMMENTS
+### ===========================================================
+
+### Comments on a student
+GET {{baseUrl}}/api/comments/?student=3537
+Authorization: Bearer {{accessToken}}
+
+### Add a comment as a teacher (comment is attributed to the logged-in teacher)
+POST {{baseUrl}}/api/comments/
+Authorization: Bearer {{teacherToken}}
+Content-Type: {{contentType}}
+
+{
+  "student": 3537,
+  "comment": "Good improvement in class tests this term.",
+  "visibility": "INTERNAL"
+}
+
+
+### ===========================================================
+### 10. CARD GENERATION (PDF — open the response in a PDF viewer)
+### ===========================================================
+
+### Student ID Card
+GET {{baseUrl}}/api/cards/id/201/
+Authorization: Bearer {{accessToken}}
+
+### Registration Card
+GET {{baseUrl}}/api/cards/registration/201/
+Authorization: Bearer {{accessToken}}
+
+### Admit Card (student must be Class 9/10 with an exam in that class)
+GET {{baseUrl}}/api/cards/admit/3537/1/
+Authorization: Bearer {{accessToken}}

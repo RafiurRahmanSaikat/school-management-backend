@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block title %}
+        Card & Testimonial Generator
+      {% endblock %}
+    </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --primary: #0f5132;
+        --accent: #d4a418;
+        --bg: #f7f7f5;
+        --card-bg: #ffffff;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: 'Hind Siliguri', 'Noto Sans Bengali', 'Segoe UI', sans-serif;
+        background: var(--bg);
+        color: #1a1a1a;
+        line-height: 1.6;
+      }
+      header {
+        background: var(--primary);
+        color: #fff;
+        padding: 20px;
+      }
+      header .inner {
+        max-width: 900px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      header h1 {
+        margin: 0;
+        font-size: 1.3rem;
+      }
+      header nav a {
+        color: #fff;
+        text-decoration: none;
+        margin-left: 18px;
+        opacity: 0.9;
+        font-size: 0.9rem;
+      }
+      header nav a:hover {
+        opacity: 1;
+        text-decoration: underline;
+      }
+      main {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 28px 16px 60px;
+      }
+      .card {
+        background: var(--card-bg);
+        border-radius: 10px;
+        padding: 24px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        margin-bottom: 20px;
+      }
+      .field {
+        margin-bottom: 14px;
+      }
+      .field label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 0.9rem;
+      }
+      .field select,
+      .field input {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 0.95rem;
+      }
+      .field .help {
+        font-size: 0.78rem;
+        color: #777;
+        margin-top: 3px;
+      }
+      .row2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .btn {
+        display: inline-block;
+        background: var(--primary);
+        color: #fff;
+        border: none;
+        padding: 10px 22px;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .btn:hover {
+        opacity: 0.92;
+      }
+      .btn.secondary {
+        background: var(--accent);
+      }
+      .errorlist {
+        color: #b3261e;
+        list-style: none;
+        padding: 0;
+        margin: 4px 0 0;
+        font-size: 0.85rem;
+      }
+      .success-box {
+        border-left: 4px solid var(--primary);
+        background: #eef7f0;
+        padding: 14px 18px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 1px solid #eee;
+        font-size: 0.9rem;
+      }
+      th {
+        color: #555;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+      }
+      .badge {
+        display: inline-block;
+        font-size: 0.72rem;
+        padding: 2px 9px;
+        border-radius: 999px;
+        background: var(--accent);
+        color: #fff;
+      }
+      .pagination {
+        margin-top: 14px;
+        font-size: 0.9rem;
+      }
+      .pagination a {
+        color: var(--primary);
+        margin-right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Card &amp; Testimonial Generator</h1>
+        <nav>
+          <a href="{% url 'cards-frontend:generate' %}">Generate</a>
+          <a href="{% url 'cards-frontend:history' %}">History</a>
+        </nav>
+      </div>
+    </header>
+    <main>
+      {% block content %}
+
+      {% endblock %}
+    </main>
+  </body>
+</html>

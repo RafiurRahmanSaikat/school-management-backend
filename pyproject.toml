@@ -1,0 +1,18 @@
+[project]
+name = "school-management-clude"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "dj-database-url>=3.1.2",
+    "django==6.1.1",
+    "django-cors-headers>=4.9.0",
+    "django-filter==26.1",
+    "djangorestframework==3.18.1",
+    "djangorestframework-simplejwt==5.5.1",
+    "faker==40.39.0",
+    "gunicorn>=26.2.0",
+    "pillow==12.1.1",
+    "psycopg2-binary>=2.9.13",
+    "reportlab==4.4.10",
+    "whitenoise>=6.12.0",
+]

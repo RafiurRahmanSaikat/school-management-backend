@@ -1,0 +1,52 @@
+{% extends "cards/base.html" %}
+{% block title %}Generated Documents{% endblock %}
+{% block content %}
+  <div class="card">
+    <form method="get" style="margin-bottom:16px;">
+      <div class="field" style="max-width:280px;">
+        <label for="doc_type">Filter by type</label>
+        <select name="doc_type" id="doc_type" onchange="this.form.submit()">
+          <option value="">All types</option>
+          {% for value, label in doc_types %}
+            <option value="{{ value }}" {% if value == selected_doc_type %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Scope</th>
+          <th>Students</th>
+          <th>Generated</th>
+          <th>By</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for doc in documents %}
+          <tr>
+            <td><span class="badge">{{ doc.get_doc_type_display }}</span>{% if doc.doc_type == "TESTIMONIAL" %} ({{ doc.language }}){% endif %}</td>
+            <td>{{ doc.filter_summary }}</td>
+            <td>{{ doc.student_count }}</td>
+            <td>{{ doc.created_at|date:"d M Y, H:i" }}</td>
+            <td>{{ doc.generated_by.get_full_name|default:"-" }}</td>
+            <td><a class="btn" href="{{ doc.file.url }}" target="_blank" rel="noopener">Download</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">No documents generated yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% if is_paginated %}
+      <div class="pagination">
+        {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if selected_doc_type %}&doc_type={{ selected_doc_type }}{% endif %}">&laquo; Prev</a>{% endif %}
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if selected_doc_type %}&doc_type={{ selected_doc_type }}{% endif %}">Next &raquo;</a>{% endif %}
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

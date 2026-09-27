@@ -1,0 +1,116 @@
+{% extends 'cards/base.html' %}
+{% block title %}
+  Generate Cards / Testimonials
+{% endblock %}
+{% block content %}
+  {% if generated_doc %}
+    <div class="success-box">
+      <strong>{{ generated_doc.get_doc_type_display }} generated</strong> for
+      {{ generated_doc.student_count }} student{{ generated_doc.student_count|pluralize }}
+      ({{ generated_doc.filter_summary }}).<div style="margin-top:10px;">
+        <a class="btn" href="{{ generated_doc.file.url }}" target="_blank" rel="noopener">Download PDF</a>
+        <a class="btn secondary" href="{% url 'cards-frontend:history' %}">View history</a>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="card">
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <ul class="errorlist">
+          {% for e in form.non_field_errors %}
+            <li>{{ e }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      <div class="field">
+        <label for="{{ form.doc_type.id_for_label }}">Document type</label>
+        {{ form.doc_type }}
+        {{ form.doc_type.errors }}
+      </div>
+
+      <p style="font-size:0.85rem;color:#555;margin:-4px 0 14px;">
+        Scope: leave everything below blank for <em>all</em> students you can access; pick just Class for "all of Class 10"; add Section for "Class 6 - Section A"; add Group on top for "Class 10 - Section A - Science".
+      </p>
+
+      <div class="row2">
+        <div class="field">
+          <label for="{{ form.school_class.id_for_label }}">Class</label>
+          {{ form.school_class }}
+          {{ form.school_class.errors }}
+        </div>
+        <div class="field">
+          <label for="{{ form.section.id_for_label }}">Section</label>
+          {{ form.section }}
+          {{ form.section.errors }}
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="{{ form.group.id_for_label }}">Group</label>
+          {{ form.group }}
+          {{ form.group.errors }}
+        </div>
+        <div class="field" id="language-field">
+          <label for="{{ form.language.id_for_label }}">Testimonial language</label>
+          {{ form.language }}
+          <div class="help">{{ form.language.help_text }}</div>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="{{ form.roll_start.id_for_label }}">Roll no. from</label>
+          {{ form.roll_start }}
+        </div>
+        <div class="field">
+          <label for="{{ form.roll_end.id_for_label }}">Roll no. to</label>
+          {{ form.roll_end }}
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="{{ form.reg_start.id_for_label }}">Registration no. from</label>
+          {{ form.reg_start }}
+        </div>
+        <div class="field">
+          <label for="{{ form.reg_end.id_for_label }}">Registration no. to</label>
+          {{ form.reg_end }}
+        </div>
+      </div>
+
+      <div class="field" id="exam-field">
+        <label for="{{ form.exam.id_for_label }}">Exam</label>
+        {{ form.exam }}
+        <div class="help">{{ form.exam.help_text }}</div>
+        {{ form.exam.errors }}
+      </div>
+
+      <button class="btn" type="submit">Generate &amp; save to media</button>
+    </form>
+  </div>
+
+  <script>
+    // Progressive enhancement only: show the exam field for Admit Cards,
+    // and the language field for Testimonials. Server-side validation
+    // (CardGenerationForm.clean) is what actually enforces this.
+    ;(function () {
+      var docTypeEl = document.getElementById('{{ form.doc_type.id_for_label }}')
+      var examField = document.getElementById('exam-field')
+      var langField = document.getElementById('language-field')
+    
+      function sync() {
+        var v = docTypeEl.value
+        examField.style.display = v === 'ADMIT_CARD' ? 'block' : 'none'
+        langField.style.display = v === 'TESTIMONIAL' ? 'block' : 'none'
+      }
+      docTypeEl.addEventListener('change', sync)
+      sync()
+    })()
+  </script>
+{% endblock %}

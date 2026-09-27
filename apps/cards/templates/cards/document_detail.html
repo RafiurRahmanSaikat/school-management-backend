@@ -1,0 +1,30 @@
+{% extends 'cards/base.html' %}
+{% block title %}
+  {{ document.get_doc_type_display }}
+{% endblock %}
+{% block content %}
+  <div class="card">
+    <h2 style="margin-top:0;">{{ document.get_doc_type_display }}</h2>
+    <p>
+      <strong>Scope:</strong> {{ document.filter_summary }}
+    </p>
+    <p>
+      <strong>Students:</strong> {{ document.student_count }}
+    </p>
+    {% if document.doc_type == 'TESTIMONIAL' %}
+      <p>
+        <strong>Language:</strong> {{ document.get_language_display }}
+      </p>
+    {% endif %}
+    {% if document.exam %}
+      <p>
+        <strong>Exam:</strong> {{ document.exam.name }}
+      </p>
+    {% endif %}
+    <p>
+      <strong>Generated:</strong> {{ document.created_at|date:'d M Y, H:i' }} by {{ document.generated_by.get_full_name|default:'-' }}
+    </p>
+    <a class="btn" href="{{ document.file.url }}" target="_blank" rel="noopener">Download PDF</a>
+    <a class="btn secondary" href="{% url 'cards-frontend:history' %}">Back to history</a>
+  </div>
+{% endblock %}

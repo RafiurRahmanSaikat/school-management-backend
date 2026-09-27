@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ school_name|default:'বিদ্যালয় ব্যবস্থাপনা সিস্টেম' }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --primary: #0f5132;
+        --accent: #d4a418;
+        --bg: #f7f7f5;
+        --card-bg: #ffffff;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: 'Hind Siliguri', 'Noto Sans Bengali', 'Segoe UI', sans-serif;
+        background: var(--bg);
+        color: #1a1a1a;
+        line-height: 1.7;
+      }
+      header {
+        background: var(--primary);
+        color: #fff;
+        padding: 28px 20px;
+        text-align: center;
+      }
+      header h1 {
+        margin: 0 0 6px 0;
+        font-size: 1.8rem;
+        font-weight: 700;
+      }
+      header p {
+        margin: 0;
+        opacity: 0.85;
+      }
+      main {
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 30px 16px 60px;
+      }
+      h2.section-title {
+        font-size: 1.3rem;
+        border-left: 5px solid var(--accent);
+        padding-left: 10px;
+        margin-bottom: 20px;
+        color: var(--primary);
+      }
+      .notice-card {
+        background: var(--card-bg);
+        border-radius: 10px;
+        padding: 18px 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        border-top: 4px solid var(--accent);
+      }
+      .notice-card.pinned {
+        border-top-color: var(--primary);
+      }
+      .notice-title {
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin: 0 0 6px 0;
+        color: #111;
+      }
+      .notice-meta {
+        font-size: 0.85rem;
+        color: #777;
+        margin-bottom: 10px;
+      }
+      .notice-body {
+        font-size: 1rem;
+        white-space: pre-line;
+      }
+      .badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        padding: 2px 10px;
+        border-radius: 999px;
+        background: var(--accent);
+        color: #fff;
+        margin-right: 8px;
+      }
+      .empty {
+        text-align: center;
+        color: #888;
+        padding: 40px 0;
+      }
+      a.attachment-link {
+        display: inline-block;
+        margin-top: 8px;
+        font-size: 0.9rem;
+        color: var(--primary);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>বিদ্যালয় ব্যবস্থাপনা সিস্টেম</h1>
+      <p>School Management System — Notice Board</p>
+    </header>
+    <main>
+      <h2 class="section-title">সাম্প্রতিক নোটিশ (Recent Notices)</h2>
+
+      {% if notices %}
+        {% for notice in notices %}
+          <article class="notice-card {% if notice.pin_to_top %}pinned{% endif %}">
+            <span class="badge">{{ notice.get_category_display }}</span>
+            <h3 class="notice-title">{{ notice.title }}</h3>
+            <div class="notice-meta">প্রকাশের তারিখ: {{ notice.published_at|date:'d F, Y' }}</div>
+            <div class="notice-body">{{ notice.body }}</div>
+            {% if notice.attachment %}
+              <a class="attachment-link" href="{{ notice.attachment.url }}" target="_blank" rel="noopener">সংযুক্তি দেখুন (View attachment)</a>
+            {% endif %}
+          </article>
+        {% endfor %}
+      {% else %}
+        <p class="empty">কোনো নোটিশ প্রকাশিত হয়নি। (No notices published yet.)</p>
+      {% endif %}
+    </main>
+  </body>
+</html>

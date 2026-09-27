@@ -1,0 +1,1273 @@
+{
+  "info": {
+    "_postman_id": "31093184-f303-4f92-815d-6db8fd35b68f",
+    "name": "School Management System API Clude v2",
+    "description": "Bangladeshi secondary school (Class 6-10) backend — Django + DRF. Run 'Login (admin)' first to auto-populate {{access_token}}, and 'Login (teacher)' to populate {{teacher_token}} for permission testing. Requires `python manage.py seed_data` to have real IDs to test against.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+    "_exporter_id": "51519080"
+  },
+  "item": [
+    {
+      "name": "0. Auth",
+      "item": [
+        {
+          "name": "Login (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const data = pm.response.json();",
+                  "pm.collectionVariables.set(\"access_token\", data.access);",
+                  "pm.collectionVariables.set(\"refresh_token\", data.refresh);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin12345\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/token"
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/token/refresh"
+          },
+          "response": []
+        },
+        {
+          "name": "Login (teacher)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "pm.collectionVariables.set(\"teacher_token\", data.access);",
+                  ""
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"teacher001\",\n  \"password\": \"teacher12345\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/token"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "1. Public / Homepage",
+      "item": [
+        {
+          "name": "Homepage (Bangla notices, HTML)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/"
+          },
+          "response": []
+        },
+        {
+          "name": "Public Notices Feed (JSON)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/public/notices"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Users / Accounts",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Retrieve User",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/users/1"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Staff Account",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"newstaff01\",\n  \"password\": \"ChangeMe123!\",\n  \"first_name\": \"Nusrat\",\n  \"last_name\": \"Jahan\",\n  \"email\": \"newstaff01@school.edu.bd\",\n  \"phone\": \"01711000000\",\n  \"role\": \"STAFF\",\n  \"gender\": \"F\"\n}"
+            },
+            "url": "{{base_url}}/api/users"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Academic Structure",
+      "item": [
+        {
+          "name": "List Academic Years",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/academic-years"
+          },
+          "response": []
+        },
+        {
+          "name": "List Classes (Form 6-10)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/classes"
+          },
+          "response": []
+        },
+        {
+          "name": "List Groups",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/groups"
+          },
+          "response": []
+        },
+        {
+          "name": "List Sections",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/sections"
+          },
+          "response": []
+        },
+        {
+          "name": "List Sections (filtered by class)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/sections?school_class=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sections"],
+              "query": [
+                {
+                  "key": "school_class",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Subjects (full NCTB table)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/subjects"
+          },
+          "response": []
+        },
+        {
+          "name": "List Subjects (by category)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/subjects?category=SCIENCE",
+              "host": ["{{base_url}}"],
+              "path": ["api", "subjects"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "SCIENCE"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Teachers",
+      "item": [
+        {
+          "name": "List Teachers",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/teachers?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "teachers"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Teachers by Name",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/teachers?search=Rahman",
+              "host": ["{{base_url}}"],
+              "path": ["api", "teachers"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Rahman"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Retrieve Teacher",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/teachers/1"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Teacher Qualification",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"education_qualification\": \"M.Sc in Physics, B.Ed\"\n}"
+            },
+            "url": "{{base_url}}/api/teachers/1"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Students",
+      "item": [
+        {
+          "name": "List Students",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/students?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "students"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filter: Active Class 9 Science Students",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/students?section__school_class=4&section__group=1&status=ACTIVE",
+              "host": ["{{base_url}}"],
+              "path": ["api", "students"],
+              "query": [
+                {
+                  "key": "section__school_class",
+                  "value": "4"
+                },
+                {
+                  "key": "section__group",
+                  "value": "1"
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Students",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/students?search=Rahman",
+              "host": ["{{base_url}}"],
+              "path": ["api", "students"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Rahman"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Retrieve Student (full detail)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/students/201"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Student (admin/class teacher)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"previous_school\": \"Updated Previous School Name\"\n}"
+            },
+            "url": "{{base_url}}/api/students/201"
+          },
+          "response": []
+        },
+        {
+          "name": "Retrieve Student as Subject Teacher (expect 403 outside own section)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{teacher_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/students/201"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Student",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Arifa\",\n  \"last_name\": \"Islam\",\n  \"gender\": \"F\",\n  \"date_of_birth\": \"2012-04-15\",\n  \"religion\": \"ISLAM\",\n  \"section\": 1,\n  \"roll_no\": 999,\n  \"registration_no\": \"2026999999\",\n  \"admission_date\": \"2026-01-10\",\n  \"father_name\": \"Kamal Islam\",\n  \"father_phone\": \"01711111111\",\n  \"mother_name\": \"Rehana Islam\",\n  \"mother_phone\": \"01722222222\",\n  \"guardian_relation\": \"FATHER\",\n  \"guardian_name\": \"Kamal Islam\",\n  \"guardian_phone\": \"01711111111\"\n}"
+            },
+            "url": "{{base_url}}/api/students"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Exams, Marks & GPA",
+      "item": [
+        {
+          "name": "List Exams",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/exams"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Entries for a Student",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/mark-entries?student=3537",
+              "host": ["{{base_url}}"],
+              "path": ["api", "mark-entries"],
+              "query": [
+                {
+                  "key": "student",
+                  "value": "3537"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create/Update a Mark Entry",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"exam\": 1,\n  \"student\": 3537,\n  \"subject\": 1,\n  \"cq_obtained\": 65,\n  \"mcq_obtained\": 28,\n  \"practical_obtained\": 0\n}"
+            },
+            "url": "{{base_url}}/api/mark-entries"
+          },
+          "response": []
+        },
+        {
+          "name": "Recompute GPA for Student+Exam",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student\": 3537,\n  \"exam\": 1\n}"
+            },
+            "url": "{{base_url}}/api/mark-entries/recompute"
+          },
+          "response": []
+        },
+        {
+          "name": "Exam Results (GPA) for a Student",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/exam-results?student=3537",
+              "host": ["{{base_url}}"],
+              "path": ["api", "exam-results"],
+              "query": [
+                {
+                  "key": "student",
+                  "value": "3537"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7. Billing",
+      "item": [
+        {
+          "name": "List Fee Categories",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/fee-categories"
+          },
+          "response": []
+        },
+        {
+          "name": "Bills for a Student",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/bills?student=3537",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bills"],
+              "query": [
+                {
+                  "key": "student",
+                  "value": "3537"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unpaid Bills (school-wide)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/bills?status=UNPAID",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bills"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "UNPAID"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Record a Payment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bill\": 1,\n  \"amount\": 500,\n  \"method\": \"BKASH\",\n  \"paid_on\": \"2026-09-26\",\n  \"note\": \"Paid via bKash\"\n}"
+            },
+            "url": "{{base_url}}/api/payments"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "8. Notices (Bangla)",
+      "item": [
+        {
+          "name": "List Notices",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/notices"
+          },
+          "response": []
+        },
+        {
+          "name": "Publish a Bangla Notice",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"শিক্ষক অভিভাবক সমাবেশ\",\n  \"body\": \"আগামী ৫ অক্টোবর ২০২৬ তারিখে শিক্ষক-অভিভাবক সমাবেশ অনুষ্ঠিত হবে। সকল অভিভাবককে উপস্থিত থাকার জন্য অনুরোধ করা হলো।\",\n  \"category\": \"GENERAL\",\n  \"is_published\": true,\n  \"pin_to_top\": false\n}"
+            },
+            "url": "{{base_url}}/api/notices"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "9. Teacher Comments",
+      "item": [
+        {
+          "name": "Comments on a Student",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{access_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/comments?student=3537",
+              "host": ["{{base_url}}"],
+              "path": ["api", "comments"],
+              "query": [
+                {
+                  "key": "student",
+                  "value": "3537"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add a Comment (as teacher)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{teacher_token}}"
+              }
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student\": 3537,\n  \"comment\": \"Good improvement in class tests this term.\",\n  \"visibility\": \"INTERNAL\"\n}"
+            },
+            "url": "{{base_url}}/api/comments"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10. Card Generation (PDF)",
+      "item": [
+        {
+          "name": "Cards - Single Student",
+          "item": [
+            {
+              "name": "ID Card",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{access_token}}"
+                  }
+                },
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/api/cards/id/{{student_id}}"
+              },
+              "response": []
+            },
+            {
+              "name": "Registration Card",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{access_token}}"
+                  }
+                },
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/api/cards/registration/{{student_id}}"
+              },
+              "response": []
+            },
+            {
+              "name": "Admit Card",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{access_token}}"
+                  }
+                },
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/api/cards/admit/{{student_id}}/{{exam_id}}"
+              },
+              "response": []
+            },
+            {
+              "name": "Testimonial (English)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{access_token}}"
+                  }
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/cards/testimonial/{{student_id}}?language=EN",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "cards", "testimonial", "{{student_id}}"],
+                  "query": [
+                    {
+                      "key": "language",
+                      "value": "EN"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Testimonial (Bangla)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{access_token}}"
+                  }
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/cards/testimonial/{{student_id}}?language=BN",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "cards", "testimonial", "{{student_id}}"],
+                  "query": [
+                    {
+                      "key": "language",
+                      "value": "BN"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Cards - Bulk",
+          "item": [
+            {
+              "name": "ID Cards - Bulk",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{access_token}}"
+                  }
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/cards/id/bulk?class_id={{class_id}}&section_id={{section_id}}&roll_start={{roll_start}}&roll_end={{roll_end}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "cards", "id", "bulk"],
+                  "query": [
+                    {
+                      "key": "class_id",
+                      "value": "{{class_id}}"
+                    },
+                    {
+                      "key": "section_id",
+                      "value": "{{section_id}}"
+                    },
+                    {
+                      "key": "group_id",
+                      "value": "{{group_id}}",
+                      "disabled": true
+                    },
+                    {
+                      "key": "roll_start",
+                      "value": "{{roll_start}}"
+                    },
+                    {
+                      "key": "roll_end",
+                      "value": "{{roll_end}}"
+                    },
+                    {
+                      "key": "reg_start",
+                      "value": "{{reg_start}}",
+                      "disabled": true
+                    },
+                    {
+                      "key": "reg_end",
+                      "value": "{{reg_end}}",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Registration Cards - Bulk",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{access_token}}"
+                  }
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/cards/registration/bulk?class_id={{class_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "cards", "registration", "bulk"],
+                  "query": [
+                    {
+                      "key": "class_id",
+                      "value": "{{class_id}}"
+                    },
+                    {
+                      "key": "section_id",
+                      "value": "{{section_id}}",
+                      "disabled": true
+                    },
+                    {
+                      "key": "group_id",
+                      "value": "{{group_id}}",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Admit Cards - Bulk",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/cards/admit/bulk?exam_id={{exam_id}}&class_id={{class_id}}&section_id={{section_id}}&group_id={{group_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "cards", "admit", "bulk"],
+                  "query": [
+                    {
+                      "key": "exam_id",
+                      "value": "{{exam_id}}"
+                    },
+                    {
+                      "key": "class_id",
+                      "value": "{{class_id}}"
+                    },
+                    {
+                      "key": "section_id",
+                      "value": "{{section_id}}"
+                    },
+                    {
+                      "key": "group_id",
+                      "value": "{{group_id}}"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Testimonials - Bulk (English)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/cards/testimonial/bulk?language=EN&class_id={{class_id}}&section_id={{section_id}}&group_id={{group_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "cards", "testimonial", "bulk"],
+                  "query": [
+                    {
+                      "key": "language",
+                      "value": "EN"
+                    },
+                    {
+                      "key": "class_id",
+                      "value": "{{class_id}}"
+                    },
+                    {
+                      "key": "section_id",
+                      "value": "{{section_id}}"
+                    },
+                    {
+                      "key": "group_id",
+                      "value": "{{group_id}}"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Testimonials - Bulk (Bangla)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{access_token}}"
+                  }
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/cards/testimonial/bulk?language=BN&class_id={{class_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "cards", "testimonial", "bulk"],
+                  "query": [
+                    {
+                      "key": "language",
+                      "value": "BN"
+                    },
+                    {
+                      "key": "class_id",
+                      "value": "{{class_id}}"
+                    },
+                    {
+                      "key": "section_id",
+                      "value": "{{section_id}}",
+                      "disabled": true
+                    },
+                    {
+                      "key": "group_id",
+                      "value": "{{group_id}}",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Generated Documents (History)",
+          "item": [
+            {
+              "name": "List All",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{access_token}}"
+                  }
+                },
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/api/cards/generated"
+              },
+              "response": []
+            },
+            {
+              "name": "Filter by doc_type",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/cards/generated?doc_type=TESTIMONIAL",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "cards", "generated"],
+                  "query": [
+                    {
+                      "key": "doc_type",
+                      "value": "TESTIMONIAL"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Retrieve One",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/api/cards/generated/{{generated_doc_id}}"
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "teacher_token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
