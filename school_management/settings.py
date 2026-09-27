@@ -167,4 +167,4 @@ SIMPLE_JWT = {
 }
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-APPEND_SLASH = False
+APPEND_SLASH = True
