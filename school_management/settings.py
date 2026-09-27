@@ -1,15 +1,11 @@
 """
 Django settings for the School Management System.
-
-Kept intentionally simple (SQLite, console email backend) so the project
-runs out of the box for development/demo purposes. Swap DATABASES for
-Postgres and set DEBUG=False + a real SECRET_KEY before deploying.
 """
 
-import os
-import dj_database_url
 from datetime import timedelta
+import os
 from pathlib import Path
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -18,10 +14,9 @@ SECRET_KEY = os.environ.get(
     "django-insecure-change-me-before-deploying-to-production",
 )
 
+DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
 
-# DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
-# ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",")
-
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",")
 
 # ---------------------------------------------------------------------------
 # Applications
@@ -38,9 +33,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_filters",
     "corsheaders",
-    # project apps — each is self-contained (models/admin/serializers/views/
-    # urls) so adding a new feature area is "add one app + one include()",
-    # never touching an existing app's files.
+    # project apps
     "apps.core",
     "apps.accounts",
     "apps.academics",
@@ -53,23 +46,25 @@ INSTALLED_APPS = [
     "apps.cards",
 ]
 
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # dev
-]
-
+# ---------------------------------------------------------------------------
+# Middleware
+# ---------------------------------------------------------------------------
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # Placed early to handle cross-origin requests
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = "school_management.urls"
 
@@ -90,34 +85,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "school_management.wsgi.application"
 
-
 # ---------------------------------------------------------------------------
-# Database — SQLite by default; point DATABASE_URL-style env vars at Postgres
-# for production without touching this file's structure.
+# Database — PostgreSQL on Render via DATABASE_URL, SQLite locally
 # ---------------------------------------------------------------------------
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
-
-#!---------------------------------------------------------------
-
-DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
-
-ALLOWED_HOSTS = ["*"]  # Render handles domain routing automatically
-
-# Database: Uses PostgreSQL when DATABASE_URL is set (Production), else SQLite (Local)
 DATABASES = {
     "default": dj_database_url.config(
-        default="sqlite:///" + os.path.join(BASE_DIR, "db.sqlite3"), conn_max_age=600
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
     )
 }
-#!-----------------------------------------------------------------
 
-
+# ---------------------------------------------------------------------------
+# Authentication & Passwords
+# ---------------------------------------------------------------------------
 AUTH_USER_MODEL = "accounts.User"
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -129,36 +109,40 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-
 # ---------------------------------------------------------------------------
-# I18n — Bangladesh timezone; Bangla notices are UTF-8 text rendered with a
-# Bangla web font in the homepage template (see templates/notices/home.html).
+# Internationalization
 # ---------------------------------------------------------------------------
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Dhaka"
 USE_I18N = True
 USE_TZ = True
 
-
 # ---------------------------------------------------------------------------
-# Static & media (student/teacher profile pictures, notice attachments)
+# Static & Media Files
 # ---------------------------------------------------------------------------
-# STATIC_URL = "static/"
-# STATICFILES_DIRS = [BASE_DIR / "static"]
-# STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# Optional local static folder if present
+if (BASE_DIR / "static").exists():
+    STATICFILES_DIRS = [BASE_DIR / "static"]
 
-MEDIA_URL = "media/"
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
-
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
 # ---------------------------------------------------------------------------
-# Django REST Framework
+# Django REST Framework & JWT
 # ---------------------------------------------------------------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -184,4 +168,3 @@ SIMPLE_JWT = {
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 APPEND_SLASH = False
-AUTH_USER_MODEL = "accounts.User"
